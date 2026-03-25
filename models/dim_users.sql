@@ -1,0 +1,2 @@
+CREATE OR REPLACE TABLE dim_users AS
+SELECT * FROM stg_users;
