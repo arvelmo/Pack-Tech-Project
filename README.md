@@ -1,3 +1,6 @@
+Run pipeline.py
+
+
 # Pack-Tech-Project
 PACK Data Challenge
 
@@ -45,5 +48,4 @@ Business Metrics
 =======================================================================================
 Rebooking Rate = % users booking again in last 30 days
 
-Run pipelin.py
 
