@@ -27,6 +27,13 @@ dim_users
 dim_mentors
 fct_sessions
 
+Schema validations
+=======================================================================================
+Column presence checks
+Data type validation (timestamps, dates)
+Non-empty file validation
+JSON structure validation
+
 Data Quality
 =======================================================================================
 Checks implemented:
