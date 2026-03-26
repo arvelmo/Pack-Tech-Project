@@ -15,7 +15,7 @@ Local DWH => DuckDB
 Data ingestion => Python
 Transformation => SQL
 
-Data flow: Raw -> Staging -> Dimensional Model -> Analytics (Medallion architecture)
+Data flow: (Medallion architecture) Raw -> Staging -> Dimensional Model -> Analytics 
 
 Challenges Solved
 =======================================================================================
