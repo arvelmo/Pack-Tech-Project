@@ -49,4 +49,9 @@ Business Metrics
 =======================================================================================
 Rebooking Rate = % users booking again in last 30 days
 
+Here is the result of data ingestion and validation. For analytical part, please execute analysis.sql
+
+<img width="974" height="375" alt="image" src="https://github.com/user-attachments/assets/016ba4ec-1005-4e1e-a7fa-6ba2bdaae39e" />
+
+
 
