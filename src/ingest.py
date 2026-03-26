@@ -27,27 +27,56 @@ EXPECTED_SCHEMAS = {
 #FUNCTIONS
 ###############################################
 
+# GET COLUMS
+
+def get_columns(con, query):
+
+    result = con.execute(query).fetchall()
+
+    return {row[0].lower() for row in result}
+
 # VALIDATE ALL FILES ARE PRESENT
 
 def validate_files():
+
     for file in REQUIRED_FILES:
+
         if not os.path.exists(file):
+
             raise FileNotFoundError(f"Missing required file: {file}")
 
 # VALIDATE SCHEMA OF A CSV FILE
 
 def validate_csv_schema(con, file_path, expected_columns, name):
-    df = con.execute(f"SELECT * FROM read_csv_auto('{file_path}') LIMIT 1").df()
-    if not expected_columns.issubset(set(df.columns)):
-        raise ValueError(f"{name} schema mismatch: {df.columns}")
+
+    cols = get_columns(
+        con,
+        f"DESCRIBE SELECT * FROM read_csv_auto('{file_path}')"
+    )
+
+    expected_columns = {col.lower() for col in expected_columns}
+
+    if not expected_columns.issubset(cols):
+
+        raise ValueError(f"{name} schema mismatch: {cols}")
+
     logging.info(f"{name} schema valid")
 
 # VALIDATE SCHEMA OF A JSON FILE
 
 def validate_json_schema(con, file_path, expected_columns):
-    df = con.execute(f"SELECT * FROM read_json_auto('{file_path}') LIMIT 5").df()
-    if not expected_columns.issubset(set(df.columns)):
-        raise ValueError(f"JSON schema mismatch: {df.columns}")
+    
+    cols = get_columns(
+        con,
+        f"DESCRIBE SELECT * FROM read_json_auto('{file_path}')"
+    )
+
+    expected_columns = {col.lower() for col in expected_columns}
+
+    if not expected_columns.issubset(cols):
+        
+        raise ValueError(f"JSON schema mismatch: {cols}")
+
     logging.info("Events schema valid")
 
 # VALIDATE DATA TYPES
@@ -95,9 +124,9 @@ def validate_non_empty(con):
 def run_query(con, query, name):
     try:
         con.execute(query)
-        logging.info(f"✅ {name} created")
+        logging.info(f"{name} created")
     except Exception as e:
-        logging.error(f"❌ Failed {name}: {e}")
+        logging.error(f"Failed {name}: {e}")
         raise
 
 
@@ -121,8 +150,8 @@ def main():
         WITH raw AS (
             SELECT
                 CAST(user_id AS VARCHAR) AS user_id,
-                company_id,
-                CAST(signup_date AS TIMESTAMP) AS signup_date,
+                NULLIF(TRIM(company_id), '') AS company_id,
+                TRY_CAST(NULLIF(TRIM(signup_date), '') AS TIMESTAMP) AS signup_date,
                 status,
                 NOW() AS ingested_at,
                 md5(
@@ -130,7 +159,10 @@ def main():
                     COALESCE(company_id, '') ||
                     COALESCE(status, '')
                 ) AS row_hash
-            FROM read_csv_auto('data/users_db_export.csv')
+            FROM read_csv_auto(
+                'data/users_db_export.csv',
+                ALL_VARCHAR=TRUE
+            )
         ),
         dedup AS (
             SELECT *,

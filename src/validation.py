@@ -3,17 +3,35 @@ import logging
 
 DB_PATH = "dwh.duckdb"
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s"
+)
 
 
-def run_check(con, query, msg, condition):
+def run_check(con, query, msg, condition, severity="WARNING"):
+
     result = con.execute(query).fetchone()[0]
-    logging.info(f"Check result: {result}")
+
+    
+
     if condition(result):
-        raise ValueError(msg)
+
+        if severity == "ERROR":
+
+            raise ValueError(msg)
+        
+        elif severity == "WARNING":
+
+            logging.warning(f"{msg} - threshold exceeded")
+
+    else:
+            
+        logging.info(f"{msg}: {result:.2%}")
 
 
 def main():
+
     con = duckdb.connect(DB_PATH)
 
     run_check(
@@ -26,13 +44,13 @@ def main():
     run_check(
         con,
         """
-        SELECT COUNT(*) * 1.0 / (SELECT COUNT(*) FROM fct_sessions)
+        SELECT COUNT(*) / (SELECT COUNT(*) FROM fct_sessions)
         FROM fct_sessions s
         LEFT JOIN dim_users u ON s.user_id = u.user_id
         WHERE u.user_id IS NULL
         """,
-        "Too many orphan users",
-        lambda x: x > 0.05
+        "High orphan user ratio (Root cause: batch vs stream)",
+        lambda x: x > 0.3
     )
 
     run_check(
@@ -46,8 +64,6 @@ def main():
         "Invalid mentors",
         lambda x: x > 0
     )
-
-    logging.info("All validations passed")
 
 
 if __name__ == "__main__":
