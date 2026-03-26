@@ -1,4 +1,4 @@
-##HOW TO: Run pipeline.py
+HOW TO: Run pipeline.py
 ===================================================
 
 
