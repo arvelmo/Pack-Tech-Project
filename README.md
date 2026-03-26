@@ -1,4 +1,5 @@
-Run pipeline.py
+##HOW TO: Run pipeline.py
+===================================================
 
 
 # Pack-Tech-Project
